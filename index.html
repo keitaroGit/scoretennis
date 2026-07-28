@@ -55,7 +55,9 @@
 
   .scoreboard{
     position:relative; z-index:1;
-    margin: 4px 16px 0;
+    margin: 4px auto 0;
+    max-width: 340px;
+    width: calc(100% - 32px);
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -69,9 +71,11 @@
   .sb-serve{
     width:12px; flex-shrink:0; text-align:center;
     color: var(--ball); font-size:10px; opacity:0;
+  }
+  .sb-serve.active{
+    opacity:1;
     animation: servePulseText 2s ease-in-out infinite;
   }
-  .sb-serve.active{ opacity:1; }
   @keyframes servePulseText{
     0%,100%{ opacity:1; } 50%{ opacity:0.35; }
   }
@@ -81,12 +85,12 @@
     font-family:'Inter'; font-weight:600; font-size:13px;
     padding:0;
   }
-  .sb-sets{ display:flex; gap:5px; flex-shrink:0; }
+  .sb-sets{ display:flex; gap:3px; flex-shrink:0; }
   .sb-sets .setcol{
-    min-width:22px; text-align:center;
-    font-family:'JetBrains Mono', monospace; font-size:13px;
+    min-width:16px; text-align:center;
+    font-family:'JetBrains Mono', monospace; font-size:12px;
     color: var(--muted);
-    padding: 2px 4px; border-radius:5px;
+    padding: 2px 3px; border-radius:5px;
   }
   .sb-sets .setcol.current{
     color: #10151b; background: var(--ball); font-weight:700;
@@ -110,7 +114,7 @@
   .score-num{
     font-family:'Anton', sans-serif;
     font-weight:400;
-    font-size: min(30vw, 38vh, 190px);
+    font-size: min(34vw, 42vh, 220px);
     line-height:0.85;
     letter-spacing: 0.01em;
     color: var(--ink);

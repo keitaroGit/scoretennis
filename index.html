@@ -53,40 +53,43 @@
   }
   .iconbtn:active{ color: var(--ink); }
 
-  .names{
+  .scoreboard{
     position:relative; z-index:1;
-    display:grid; grid-template-columns: 1fr 1fr;
-    padding: 0 18px; gap: 10px;
+    margin: 4px 16px 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
   }
-  .name-block{ display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
-  .name-block.right{ align-items:flex-end; text-align:right; }
-  .name-input{
+  .sb-row{
+    display:flex; align-items:center; gap:8px;
+    padding: 7px 10px;
+  }
+  .sb-row + .sb-row{ border-top: 1px solid var(--line); }
+  .sb-serve{
+    width:12px; flex-shrink:0; text-align:center;
+    color: var(--ball); font-size:10px; opacity:0;
+    animation: servePulseText 2s ease-in-out infinite;
+  }
+  .sb-serve.active{ opacity:1; }
+  @keyframes servePulseText{
+    0%,100%{ opacity:1; } 50%{ opacity:0.35; }
+  }
+  .sb-name-input{
+    flex:1; min-width:0;
     background:none; border:none; color: var(--ink);
-    font-family:'Inter'; font-weight:600; font-size:14px;
-    width:100%; padding:0;
+    font-family:'Inter'; font-weight:600; font-size:13px;
+    padding:0;
   }
-  .name-block.right .name-input{ text-align:right; }
-  .games-pill{
-    font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--ball-dim);
-    display:flex; align-items:center; gap:5px;
+  .sb-sets{ display:flex; gap:5px; flex-shrink:0; }
+  .sb-sets .setcol{
+    min-width:22px; text-align:center;
+    font-family:'JetBrains Mono', monospace; font-size:13px;
+    color: var(--muted);
+    padding: 2px 4px; border-radius:5px;
   }
-  .serve-badge{
-    display:none;
-    align-items:center; gap:5px;
-    background: var(--ball); color:#10151b;
-    font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:700;
-    letter-spacing:0.06em;
-    padding: 3px 9px; border-radius: 20px;
-    cursor:pointer;
-    box-shadow: 0 0 0 0 rgba(217,240,75,0.5);
-    animation: servePulse 2s ease-in-out infinite;
-  }
-  .serve-badge.active{ display:inline-flex; }
-  .name-block.right .serve-badge{ flex-direction: row-reverse; }
-  @keyframes servePulse{
-    0%   { box-shadow: 0 0 0 0 rgba(217,240,75,0.45); }
-    70%  { box-shadow: 0 0 0 7px rgba(217,240,75,0); }
-    100% { box-shadow: 0 0 0 0 rgba(217,240,75,0); }
+  .sb-sets .setcol.current{
+    color: #10151b; background: var(--ball); font-weight:700;
   }
 
   main{
@@ -185,10 +188,10 @@
 
   @media (orientation: landscape) and (max-height: 500px){
     header{ padding: max(6px, env(safe-area-inset-top)) 16px 2px; }
-    .names{ padding: 0 18px; }
-    .name-input{ font-size:12px; }
-    .games-pill{ font-size:10px; }
-    .serve-badge{ font-size:9px; padding:2px 8px; }
+    .scoreboard{ margin: 2px 16px 0; }
+    .sb-row{ padding: 4px 10px; }
+    .sb-name-input{ font-size:11px; }
+    .sb-sets .setcol{ font-size:11px; min-width:18px; }
     .controls-row{ padding: 2px 24px 4px; }
     .footer{ padding: 0 18px max(8px, env(safe-area-inset-bottom)); font-size:10px; }
     .undo-btn{ padding:5px 12px; font-size:10px; }
@@ -239,20 +242,16 @@
     </div>
   </header>
 
-  <div class="names">
-    <div class="name-block">
-      <input class="name-input" id="p1Name" value="Player 1" maxlength="12">
-      <div class="games-pill">
-        <span id="games1">SETS 0 · GAMES 0</span>
-      </div>
-      <div class="serve-badge" id="serve1">● SERVING</div>
+  <div class="scoreboard">
+    <div class="sb-row">
+      <span class="sb-serve" id="serve1">●</span>
+      <input class="sb-name-input" id="p1Name" value="Player 1" maxlength="14">
+      <div class="sb-sets" id="sbSets1"></div>
     </div>
-    <div class="name-block right">
-      <input class="name-input" id="p2Name" value="Player 2" maxlength="12">
-      <div class="games-pill">
-        <span id="games2">SETS 0 · GAMES 0</span>
-      </div>
-      <div class="serve-badge" id="serve2">● SERVING</div>
+    <div class="sb-row">
+      <span class="sb-serve" id="serve2">●</span>
+      <input class="sb-name-input" id="p2Name" value="Player 2" maxlength="14">
+      <div class="sb-sets" id="sbSets2"></div>
     </div>
   </div>
 
@@ -325,6 +324,11 @@
         </div>
       </div>
 
+      <div class="field">
+        <label>CALLER VOICE</label>
+        <select class="num-input" id="voiceSelect"></select>
+      </div>
+
       <button class="sheet-close" id="settingsClose">DONE</button>
     </div>
   </div>
@@ -343,8 +347,10 @@
     p1: 0, p2: 0,
     games1: 0, games2: 0,
     sets1: 0, sets2: 0,
+    setHistory: [], // completed sets: [{g1,g2}, ...]
     server: 1,
     ttsOn: false,
+    selectedVoiceURI: null,
     history: [],
     tiebreak: false,
     tb1: 0, tb2: 0,
@@ -358,8 +364,8 @@
     tbLabel2: document.getElementById('tbLabel2'),
     zone1: document.getElementById('zone1'),
     zone2: document.getElementById('zone2'),
-    games1: document.getElementById('games1'),
-    games2: document.getElementById('games2'),
+    sbSets1: document.getElementById('sbSets1'),
+    sbSets2: document.getElementById('sbSets2'),
     serve1: document.getElementById('serve1'),
     serve2: document.getElementById('serve2'),
     p1Name: document.getElementById('p1Name'),
@@ -378,14 +384,16 @@
     formatSeg: document.getElementById('formatSeg'),
     gamesPerSetInput: document.getElementById('gamesPerSetInput'),
     tbSwitch: document.getElementById('tbSwitch'),
-    serverSeg: document.getElementById('serverSeg')
+    serverSeg: document.getElementById('serverSeg'),
+    voiceSelect: document.getElementById('voiceSelect')
   };
 
   function pushHistory(){
     state.history.push(JSON.stringify({
       p1:state.p1, p2:state.p2, games1:state.games1, games2:state.games2,
       sets1:state.sets1, sets2:state.sets2, tiebreak:state.tiebreak,
-      tb1:state.tb1, tb2:state.tb2, matchOver:state.matchOver
+      tb1:state.tb1, tb2:state.tb2, matchOver:state.matchOver,
+      setHistory: state.setHistory
     }));
     if(state.history.length > 80) state.history.shift();
   }
@@ -406,9 +414,15 @@
     const doSpeak = () => {
       window.speechSynthesis.cancel();
       const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+      let chosen = null;
+      if(state.selectedVoiceURI){
+        chosen = voices.find(v => v.voiceURI === state.selectedVoiceURI) || null;
+      }
+      if(!chosen){
+        chosen = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en')) || null;
+      }
       const u = new SpeechSynthesisUtterance(text);
-      if(enVoice){ u.voice = enVoice; u.lang = enVoice.lang; }
+      if(chosen){ u.voice = chosen; u.lang = chosen.lang; }
       else { u.lang = 'en-US'; }
       u.rate = 1.0;
       u.onerror = (ev) => showToast('Voice error: ' + (ev.error || 'unknown'));
@@ -420,6 +434,29 @@
       window.speechSynthesis.onvoiceschanged = doSpeak;
       setTimeout(doSpeak, 300);
     }
+  }
+
+  function populateVoiceList(){
+    if(!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+    if(!voices.length) return;
+    const prev = state.selectedVoiceURI;
+    el.voiceSelect.innerHTML = '';
+    const autoOpt = document.createElement('option');
+    autoOpt.value = '';
+    autoOpt.textContent = 'Auto (default English voice)';
+    el.voiceSelect.appendChild(autoOpt);
+    voices.forEach(v=>{
+      const opt = document.createElement('option');
+      opt.value = v.voiceURI;
+      opt.textContent = v.name + ' (' + v.lang + ')';
+      el.voiceSelect.appendChild(opt);
+    });
+    el.voiceSelect.value = prev || '';
+  }
+  if('speechSynthesis' in window){
+    populateVoiceList();
+    window.speechSynthesis.onvoiceschanged = populateVoiceList;
   }
 
   function scoreDisplay(mine, theirs){
@@ -448,10 +485,34 @@
       el.tbLabel2.textContent = '';
     }
 
-    el.games1.textContent = 'SETS ' + state.sets1 + ' · GAMES ' + state.games1;
-    el.games2.textContent = 'SETS ' + state.sets2 + ' · GAMES ' + state.games2;
+    renderSetTable();
     el.serve1.classList.toggle('active', state.server === 1);
     el.serve2.classList.toggle('active', state.server === 2);
+  }
+
+  function renderSetTable(){
+    // Number of set columns to show: completed sets + the current in-progress one.
+    const maxSets = config.setsToWin * 2 - 1;
+    const completed = state.setHistory.length;
+    const colCount = Math.min(maxSets, Math.max(completed + 1, 1));
+
+    function buildCols(container, isPlayer1){
+      container.innerHTML = '';
+      for(let i = 0; i < colCount; i++){
+        const span = document.createElement('span');
+        span.className = 'setcol';
+        if(i < completed){
+          const s = state.setHistory[i];
+          span.textContent = isPlayer1 ? s.g1 : s.g2;
+        } else if(i === completed){
+          span.textContent = isPlayer1 ? state.games1 : state.games2;
+          span.classList.add('current');
+        }
+        container.appendChild(span);
+      }
+    }
+    buildCols(el.sbSets1, true);
+    buildCols(el.sbSets2, false);
   }
   function pulse(zoneEl){
     zoneEl.classList.add('pulse');
@@ -467,6 +528,7 @@
     if(state.tiebreak){
       const serverScore = state.server===1 ? state.tb1 : state.tb2;
       const receiverScore = state.server===1 ? state.tb2 : state.tb1;
+      if(serverScore === receiverScore){ speak(serverScore + ' All'); return; }
       speak(serverScore + ', ' + receiverScore);
       return;
     }
@@ -476,6 +538,7 @@
       if(p1-p2===1){ speak('Advantage ' + n1); return; }
       if(p2-p1===1){ speak('Advantage ' + n2); return; }
     }
+    if(p1 === p2){ speak(POINT_LABELS[Math.min(p1,3)] + ' All'); return; }
     const serverPts = state.server===1 ? p1 : p2;
     const receiverPts = state.server===1 ? p2 : p1;
     speak(POINT_LABELS[Math.min(serverPts,3)] + ', ' + POINT_LABELS[Math.min(receiverPts,3)]);
@@ -489,6 +552,7 @@
   }
 
   function finishSet(winner){
+    state.setHistory.push({g1: state.games1, g2: state.games2});
     if(winner===1) state.sets1++; else state.sets2++;
     state.p1 = 0; state.p2 = 0;
     state.games1 = 0; state.games2 = 0;
@@ -601,6 +665,7 @@
     [...el.serverSeg.children].forEach(btn=>{
       btn.classList.toggle('active', Number(btn.dataset.server) === state.server);
     });
+    el.voiceSelect.value = state.selectedVoiceURI || '';
   }
   el.settingsBtn.addEventListener('click', ()=>{
     refreshSettingsUI();
@@ -636,6 +701,10 @@
       render();
     });
   });
+  el.voiceSelect.addEventListener('change', ()=>{
+    state.selectedVoiceURI = el.voiceSelect.value || null;
+    speak('Voice selected');
+  });
 
   // hold-to-reset
   let holdTimer = null;
@@ -649,7 +718,7 @@
     });
     holdTimer = setTimeout(()=>{
       state.p1=0; state.p2=0; state.games1=0; state.games2=0;
-      state.sets1=0; state.sets2=0; state.history=[];
+      state.sets1=0; state.sets2=0; state.history=[]; state.setHistory=[];
       state.tiebreak=false; state.tb1=0; state.tb2=0; state.matchOver=false;
       render();
       showToast('Match reset');

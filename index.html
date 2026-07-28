@@ -34,18 +34,9 @@
 
   header{
     position:relative; z-index:1;
-    display:flex; align-items:center; justify-content:space-between;
-    padding: max(14px, env(safe-area-inset-top)) 16px 6px;
+    display:flex; align-items:center; justify-content:flex-end;
+    padding: max(8px, env(safe-area-inset-top)) 16px 2px;
   }
-  .status{
-    display:flex; align-items:center; gap:6px;
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px; letter-spacing:0.04em;
-    color: var(--muted);
-  }
-  .dot{ width:7px; height:7px; border-radius:50%; background:var(--muted); transition:background .2s; }
-  .dot.on{ background: var(--ball); box-shadow: 0 0 8px var(--ball); }
-
   .header-right{ display:flex; align-items:center; gap:4px; }
   .iconbtn{
     background:none; border:none; color:var(--muted); padding:8px;
@@ -236,11 +227,7 @@
 <body>
 
   <header>
-    <div class="status">
-      <span class="dot" id="bleDot"></span>
-      <span id="bleLabel">CLICKER OFF</span>
-    </div>
-    <div class="header-right">
+    <div class="header-right" style="margin-left:auto;">
       <button class="iconbtn" id="settingsBtn" title="Match settings">⚙</button>
       <button class="iconbtn" id="helpBtn" title="How to use">?</button>
     </div>
@@ -379,8 +366,6 @@
     resetBtn: document.getElementById('resetBtn'),
     resetFill: document.getElementById('resetFill'),
     toast: document.getElementById('toast'),
-    bleDot: document.getElementById('bleDot'),
-    bleLabel: document.getElementById('bleLabel'),
     helpBtn: document.getElementById('helpBtn'),
     settingsBtn: document.getElementById('settingsBtn'),
     settingsOverlay: document.getElementById('settingsOverlay'),
@@ -750,8 +735,7 @@
   function markBleOk(){
     if(!bleSeen){
       bleSeen = true;
-      el.bleDot.classList.add('on');
-      el.bleLabel.textContent = 'CLICKER OK';
+      showToast('Clicker connected');
     }
   }
 

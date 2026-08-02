@@ -633,10 +633,14 @@
     Object.assign(state, prev);
     render();
     showToast('Point undone');
-    if(state.matchOver){
-      speak('Undo');
-    } else {
-      speak('Undo, ' + currentScoreCallText());
+    try{
+      if(state.matchOver){
+        speak('Undo');
+      } else {
+        speak('Undo, ' + currentScoreCallText());
+      }
+    } catch(err){
+      showToast('Undo voice error: ' + err.message);
     }
   }
 

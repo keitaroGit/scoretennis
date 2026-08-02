@@ -512,25 +512,28 @@
     return [el.p1Name.value || 'Player 1', el.p2Name.value || 'Player 2'];
   }
 
-  function callOutPoint(){
+  function currentScoreCallText(){
     const [n1, n2] = names();
     if(state.tiebreak){
       const serverScore = state.server===1 ? state.tb1 : state.tb2;
       const receiverScore = state.server===1 ? state.tb2 : state.tb1;
-      if(serverScore === receiverScore){ speak(serverScore + ' All'); return; }
-      speak(serverScore + ', ' + receiverScore);
-      return;
+      if(serverScore === receiverScore) return serverScore + ' All';
+      return serverScore + ', ' + receiverScore;
     }
     const p1 = state.p1, p2 = state.p2;
     if(p1>=3 && p2>=3){
-      if(p1===p2){ speak('Deuce'); return; }
-      if(p1-p2===1){ speak('Advantage ' + n1); return; }
-      if(p2-p1===1){ speak('Advantage ' + n2); return; }
+      if(p1===p2) return 'Deuce';
+      if(p1-p2===1) return 'Advantage ' + n1;
+      if(p2-p1===1) return 'Advantage ' + n2;
     }
-    if(p1 === p2){ speak(POINT_LABELS[Math.min(p1,3)] + ' All'); return; }
+    if(p1 === p2) return POINT_LABELS[Math.min(p1,3)] + ' All';
     const serverPts = state.server===1 ? p1 : p2;
     const receiverPts = state.server===1 ? p2 : p1;
-    speak(POINT_LABELS[Math.min(serverPts,3)] + ', ' + POINT_LABELS[Math.min(receiverPts,3)]);
+    return POINT_LABELS[Math.min(serverPts,3)] + ', ' + POINT_LABELS[Math.min(receiverPts,3)];
+  }
+
+  function callOutPoint(){
+    speak(currentScoreCallText());
   }
 
   function startTiebreak(){
@@ -630,6 +633,11 @@
     Object.assign(state, prev);
     render();
     showToast('Point undone');
+    if(state.matchOver){
+      speak('Undo');
+    } else {
+      speak('Undo, ' + currentScoreCallText());
+    }
   }
 
   el.zone1.addEventListener('click', ()=> addPoint(1));

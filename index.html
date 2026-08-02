@@ -758,6 +758,15 @@
     }
   });
 
+  // Long-press on the physical clicker sends 'u' (from the firmware) -> Undo
+  document.addEventListener('keydown', (e)=>{
+    if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
+    if(e.key !== 'u' && e.key !== 'U') return;
+    e.preventDefault();
+    markBleOk();
+    undo();
+  });
+
   el.helpBtn.addEventListener('click', ()=>{
     showToast('Button = your point / Tap right side = opponent point');
   });
